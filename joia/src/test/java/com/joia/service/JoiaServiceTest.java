@@ -55,9 +55,8 @@ class JoiaServiceTest {
     }
 
     // --- Testes para save ---
-
     @Test
-    @DisplayName("[Unit Test] Deve salvar joia com sucesso")
+    @DisplayName("TESTE DE UNIDADE – Deve salvar joia com sucesso")
     void save_deveSalvarComSucesso_quandoDadosValidos() {
         // Arrange
         Joia novaJoia = new Joia(null, "Brinco Ouro", new BigDecimal("500.00"), categoriaValida, fornecedorValido, null);
@@ -73,7 +72,7 @@ class JoiaServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao salvar joia com nome vazio")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao salvar joia com nome vazio")
     void save_deveLancarExcecao_quandoNomeVazio() {
         // Arrange
         Joia joiaInvalida = new Joia(null, "", new BigDecimal("500.00"), categoriaValida, fornecedorValido, null);
@@ -86,7 +85,7 @@ class JoiaServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao salvar joia com preço nulo")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao salvar joia com preço nulo")
     void save_deveLancarExcecao_quandoPrecoNulo() {
         // Arrange
         Joia joiaInvalida = new Joia(null, "Nome Joia", null, categoriaValida, fornecedorValido, null);
@@ -99,7 +98,7 @@ class JoiaServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao salvar joia com preço negativo")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao salvar joia com preço negativo")
     void save_deveLancarExcecao_quandoPrecoNegativo() {
         // Arrange
         Joia joiaInvalida = new Joia(null, "Nome Joia", new BigDecimal("-10.00"), categoriaValida, fornecedorValido, null);
@@ -112,7 +111,7 @@ class JoiaServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao salvar joia com categoria nula")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao salvar joia com categoria nula")
     void save_deveLancarExcecao_quandoCategoriaNula() {
         // Arrange
         Joia joiaInvalida = new Joia(null, "Nome Joia", new BigDecimal("100.00"), null, fornecedorValido, null);
@@ -125,7 +124,7 @@ class JoiaServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao salvar joia com categoria sem ID")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao salvar joia com categoria sem ID")
     void save_deveLancarExcecao_quandoCategoriaSemId() {
         // Arrange
         Categoria categoriaSemId = new Categoria(null, "Nova Categoria", null);
@@ -139,7 +138,7 @@ class JoiaServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao salvar joia com fornecedor nulo")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao salvar joia com fornecedor nulo")
     void save_deveLancarExcecao_quandoFornecedorNulo() {
         // Arrange
         Joia joiaInvalida = new Joia(null, "Nome Joia", new BigDecimal("100.00"), categoriaValida, null, null);
@@ -152,7 +151,7 @@ class JoiaServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao salvar joia com fornecedor sem ID")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao salvar joia com fornecedor sem ID")
     void save_deveLancarExcecao_quandoFornecedorSemId() {
         // Arrange
         Fornecedor fornecedorSemId = new Fornecedor(null, "Novo Fornecedor", null);
@@ -166,9 +165,8 @@ class JoiaServiceTest {
     }
 
     // --- Testes para findById ---
-
     @Test
-    @DisplayName("[Unit Test] Deve retornar joia quando ID existe")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar joia quando ID existe")
     void findById_deveRetornarJoia_quandoIdExiste() {
         // Arrange
         Long idExistente = joiaValida.getId();
@@ -184,7 +182,7 @@ class JoiaServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção quando ID não existe em findById")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção quando ID não existe em findById")
     void findById_deveLancarExcecao_quandoIdNaoExiste() {
         // Arrange
         Long idInexistente = 99L;
@@ -198,9 +196,8 @@ class JoiaServiceTest {
     }
 
     // --- Testes para findAll ---
-
     @Test
-    @DisplayName("[Unit Test] Deve retornar todas as joias")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar todas as joias")
     void findAll_deveRetornarTodasJoias() {
         // Arrange
         List<Joia> listaMock = List.of(joiaValida, joiaComPedidos);
@@ -215,10 +212,8 @@ class JoiaServiceTest {
     }
 
     // --- Testes para update ---
-    // (Similar aos testes de save, mas verificando findById antes e save depois)
-
     @Test
-    @DisplayName("[Unit Test] Deve atualizar joia com sucesso")
+    @DisplayName("TESTE DE UNIDADE – Deve atualizar joia com sucesso")
     void update_deveAtualizarComSucesso() {
         // Arrange
         Long idParaAtualizar = joiaValida.getId();
@@ -245,7 +240,7 @@ class JoiaServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao atualizar joia com ID inexistente")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao atualizar joia com ID inexistente")
     void update_deveLancarExcecao_quandoIdNaoExiste() {
         // Arrange
         Long idInexistente = 99L;
@@ -260,13 +255,9 @@ class JoiaServiceTest {
         verify(joiaRepository, never()).save(any(Joia.class));
     }
 
-    // Adicionar testes para validações de nome, preço, categoria e fornecedor no update (similar aos de save)
-
-
     // --- Testes para delete ---
-
     @Test
-    @DisplayName("[Unit Test] Deve deletar joia com sucesso quando não tem pedidos associados")
+    @DisplayName("TESTE DE UNIDADE – Deve deletar joia com sucesso quando não tem pedidos associados")
     void delete_deveDeletarComSucesso_quandoNaoHaPedidos() {
         // Arrange
         Long idParaDeletar = joiaValida.getId(); // joiaValida foi criada sem pedidos
@@ -283,7 +274,7 @@ class JoiaServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao deletar joia com pedidos associados")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao deletar joia com pedidos associados")
     void delete_deveLancarExcecao_quandoHaPedidosAssociados() {
         // Arrange
         Long idParaDeletar = joiaComPedidos.getId(); // Esta tem pedido mockado no setUp
@@ -298,9 +289,8 @@ class JoiaServiceTest {
     }
 
     // --- Testes para findAllByOrderByNomeAsc ---
-
     @Test
-    @DisplayName("[Unit Test] Deve retornar joias ordenadas por nome ascendente")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar joias ordenadas por nome ascendente")
     void findAllByOrderByNomeAsc_deveRetornarJoiasOrdenadasAsc() {
         // Arrange
         List<Joia> listaMockOrdenada = List.of(joiaValida, joiaComPedidos); // Exemplo, a ordem real viria do repo
@@ -315,9 +305,8 @@ class JoiaServiceTest {
     }
 
     // --- Testes para filtrar ---
-
     @Test
-    @DisplayName("[Unit Test] Deve chamar repositório filtrar com todos os parâmetros")
+    @DisplayName("TESTE DE UNIDADE – Deve chamar repositório filtrar com todos os parâmetros")
     void filtrar_deveChamarRepositorioComTodosParametros() {
         // Arrange
         String nome = "Anel";
@@ -336,7 +325,7 @@ class JoiaServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve chamar repositório filtrar com parâmetros nulos corretamente")
+    @DisplayName("TESTE DE UNIDADE – Deve chamar repositório filtrar com parâmetros nulos corretamente")
     void filtrar_deveChamarRepositorioComParametrosNulos() {
         // Arrange
         String nome = "Colar";
@@ -356,7 +345,7 @@ class JoiaServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve chamar repositório filtrar com nome vazio/nulo corretamente (passando null)")
+    @DisplayName("TESTE DE UNIDADE – Deve chamar repositório filtrar com nome vazio/nulo corretamente (passando null)")
     void filtrar_deveChamarRepositorioComNomeNulo() {
         // Arrange
         Long categoriaId = 1L;
@@ -381,7 +370,7 @@ class JoiaServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve chamar repositório filtrar com ID de categoria inválido (passando null)")
+    @DisplayName("TESTE DE UNIDADE – Deve chamar repositório filtrar com ID de categoria inválido (passando null)")
     void filtrar_deveChamarRepositorioComCategoriaIdInvalido() {
         // Arrange
         String nome = "Joia";
@@ -401,7 +390,7 @@ class JoiaServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve chamar repositório filtrar com preço mínimo negativo (passando null)")
+    @DisplayName("TESTE DE UNIDADE – Deve chamar repositório filtrar com preço mínimo negativo (passando null)")
     void filtrar_deveChamarRepositorioComPrecoMinNegativo() {
         // Arrange
         String nome = "Joia";

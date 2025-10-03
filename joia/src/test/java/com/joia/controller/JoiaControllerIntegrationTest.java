@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -41,7 +42,8 @@ class JoiaControllerIntegrationTest {
     private JoiaService joiaServiceMock;
 
     @Test
-    @DisplayName("[Integration Test com Mock] POST /save - Deve criar joia com sucesso")
+    @DisplayName("TESTE DE INTEGRAÇÃO - POST /save - Deve criar joia com sucesso")
+    @WithMockUser(username = "testadmin", roles = {"ADMIN"})
     void save_deveCriarJoia_quandoDadosValidos() throws Exception {
         Categoria cat = new Categoria(1L, "Anel", null);
         Fornecedor forn = new Fornecedor(1L, "Ouro Nobre", null);
@@ -59,7 +61,27 @@ class JoiaControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration Test com Mock] GET /findAll - Deve retornar todas as joias")
+    @DisplayName("TESTE DE INTEGRAÇÃO - GET /findById/{id} - Deve retornar joia existente")
+    @WithMockUser(username = "testuser", roles = {"USER"})
+    void findById_deveRetornarJoia_quandoIdExiste() throws Exception {
+        Long idExistente = 1L;
+        Categoria cat = new Categoria(1L, "Anel", null);
+        Fornecedor forn = new Fornecedor(1L, "Ouro Nobre", null);
+        Joia joiaMock = new Joia(idExistente, "Anel Solitário", new BigDecimal("1500.00"), cat, forn, new ArrayList<>());
+        when(joiaServiceMock.findById(idExistente)).thenReturn(joiaMock);
+
+        mockMvc.perform(get("/api/joias/findById/{id}", idExistente))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", is(idExistente.intValue())))
+                .andExpect(jsonPath("$.nome", is("Anel Solitário")));
+
+        verify(joiaServiceMock, times(1)).findById(idExistente);
+    }
+
+    @Test
+    @DisplayName("TESTE DE INTEGRAÇÃO - GET /findAll - Deve retornar todas as joias")
+    @WithMockUser(username = "testuser", roles = {"USER"})
     void findAll_deveRetornarTodasJoias() throws Exception {
         Categoria cat = new Categoria(1L, "Anel", null);
         Fornecedor forn = new Fornecedor(1L, "Ouro Nobre", null);
@@ -76,26 +98,10 @@ class JoiaControllerIntegrationTest {
 
         verify(joiaServiceMock, times(1)).findAll();
     }
-    @Test
-    @DisplayName("[Integration Test com Mock] GET /findById/{id} - Deve retornar joia existente")
-    void findById_deveRetornarJoia_quandoIdExiste() throws Exception {
-        Long idExistente = 1L;
-        Categoria cat = new Categoria(1L, "Anel", null);
-        Fornecedor forn = new Fornecedor(1L, "Ouro Nobre", null);
-        Joia joiaMock = new Joia(idExistente, "Anel Solitário", new BigDecimal("1500.00"), cat, forn, new ArrayList<>());
-        when(joiaServiceMock.findById(idExistente)).thenReturn(joiaMock);
 
-        mockMvc.perform(get("/api/joias/findById/{id}", idExistente))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(idExistente.intValue())))
-                .andExpect(jsonPath("$.nome", is("Anel Solitário")));
-
-        verify(joiaServiceMock, times(1)).findById(idExistente);
-    }
-    
     @Test
-    @DisplayName("[Integration Test com Mock] PUT /update/{id} - Deve atualizar joia com sucesso")
+    @DisplayName("TESTE DE INTEGRAÇÃO - PUT /update/{id} - Deve atualizar joia com sucesso")
+    @WithMockUser(username = "testadmin", roles = {"ADMIN"})
     void update_deveAtualizarJoia_quandoDadosValidos() throws Exception {
         // Arrange
         Long idParaAtualizar = 1L;
@@ -116,9 +122,29 @@ class JoiaControllerIntegrationTest {
         verify(joiaServiceMock, times(1)).update(any(Joia.class), eq(idParaAtualizar));
     }
 
+    @Test
+    @DisplayName("TESTE DE INTEGRAÇÃO - PUT /update/{id} - Deve retornar Bad Request (Access Denied) para ROLE_USER")
+    @WithMockUser(username = "testuser", roles = {"USER"})
+    void update_deveRetornarBadRequestAccessDenied_comUser() throws Exception {
+        Long idParaAtualizar = 1L;
+        Categoria cat = new Categoria(1L, "Anel", null);
+        Fornecedor forn = new Fornecedor(1L, "Ouro Nobre", null);
+        Joia dadosUpdate = new Joia(idParaAtualizar, "Anel Solitário Atualizado", new BigDecimal("1600.00"), cat, forn, null);
+        String joiaJson = objectMapper.writeValueAsString(dadosUpdate);
+
+        mockMvc.perform(put("/api/joias/update/{id}", idParaAtualizar)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(joiaJson))
+                .andExpect(status().isBadRequest()) // Ou isForbidden()
+                .andExpect(jsonPath("$.message", containsString("Access Denied")));
+
+        verify(joiaServiceMock, never()).update(any(Joia.class), eq(idParaAtualizar));
+    }
+
     // --- Teste para DELETE /api/joias/delete/{id} ---
     @Test
-    @DisplayName("[Integration Test com Mock] DELETE /delete/{id} - Deve deletar joia com sucesso")
+    @DisplayName("TESTE DE INTEGRAÇÃO - DELETE /delete/{id} - Deve deletar joia com sucesso")
+    @WithMockUser(username = "testadmin", roles = {"ADMIN"})
     void delete_deveDeletarJoia_quandoIdExiste() throws Exception {
         // Arrange
         Long idParaDeletar = 1L;
@@ -133,5 +159,16 @@ class JoiaControllerIntegrationTest {
         verify(joiaServiceMock, times(1)).delete(idParaDeletar);
     }
 
-    // Adicionar testes para os endpoints de filtro (findAllByOrderByNomeAsc, filtrar) se desejar
+    @Test
+    @DisplayName("TESTE DE INTEGRAÇÃO - DELETE /delete/{id} - Deve retornar Bad Request (Access Denied) para ROLE_USER")
+    @WithMockUser(username = "testuser", roles = {"USER"})
+    void delete_deveRetornarBadRequestAccessDenied_comUser() throws Exception {
+        Long idParaDeletar = 1L;
+
+        mockMvc.perform(delete("/api/joias/delete/{id}", idParaDeletar))
+                .andExpect(status().isBadRequest()) // Ou isForbidden()
+                .andExpect(jsonPath("$.message", containsString("Access Denied")));
+
+        verify(joiaServiceMock, never()).delete(idParaDeletar);
+    }
 }

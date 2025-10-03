@@ -10,8 +10,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional; // Boa prática, mesmo com mocks
+import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,7 +37,8 @@ class CategoriaControllerIntegrationTest {
     private CategoriaService categoriaServiceMock;
 
     @Test
-    @DisplayName("[Integration Test com Mock] POST /save - Deve criar categoria com sucesso")
+    @DisplayName("TESTE DE INTEGRAÇÃO - POST /save - Deve criar categoria com sucesso")
+    @WithMockUser(username = "testadmin", roles= {"ADMIN"})
     void save_deveCriarCategoria_quandoDadosValidos() throws Exception {
         Categoria novaCategoria = new Categoria(null, "Brincos", null);
         String categoriaJson = objectMapper.writeValueAsString(novaCategoria);
@@ -52,7 +54,8 @@ class CategoriaControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration Test com Mock] POST /save - Deve retornar Bad Request com nome vazio")
+    @DisplayName("TESTE DE INTEGRAÇÃO - POST /save - Deve retornar Bad Request com nome vazio")
+    @WithMockUser(username = "testadmin", roles= {"ADMIN"})
     void save_deveRetornarBadRequest_quandoNomeVazio() throws Exception {
         Categoria categoriaInvalida = new Categoria(null, "", null);
         String categoriaJson = objectMapper.writeValueAsString(categoriaInvalida);
@@ -67,7 +70,8 @@ class CategoriaControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration Test com Mock] GET /findAll - Deve retornar todas as categorias")
+    @DisplayName("TESTE DE INTEGRAÇÃO - GET /findAll - Deve retornar todas as categorias")
+    @WithMockUser(username = "testuser")
     void findAll_deveRetornarTodasCategorias() throws Exception {
         Categoria cat1 = new Categoria(1L, "Anéis", new ArrayList<>());
         Categoria cat2 = new Categoria(2L, "Colares", new ArrayList<>());
@@ -86,7 +90,8 @@ class CategoriaControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration Test com Mock] GET /findById/{id} - Deve retornar categoria existente")
+    @DisplayName("TESTE DE INTEGRAÇÃO - GET /findById/{id} - Deve retornar categoria existente")
+    @WithMockUser(username = "testuser")
     void findById_deveRetornarCategoria_quandoIdExiste() throws Exception {
         Long idExistente = 1L;
         Categoria categoriaMock = new Categoria(idExistente, "Anéis", new ArrayList<>());
@@ -102,21 +107,28 @@ class CategoriaControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration Test com Mock] GET /findById/{id} - Deve retornar Bad Request se ID não existe")
+    @DisplayName("TESTE DE INTEGRAÇÃO - GET /findById/{id} - Deve retornar Bad Request se ID não existe")
+    @WithMockUser(username = "testuser")
     void findById_deveRetornarBadRequest_quandoIdNaoExiste() throws Exception {
         Long idInexistente = 99L;
         String mensagemErro = "Categoria ID " + idInexistente + " não encontrada!";
         when(categoriaServiceMock.findById(idInexistente)).thenThrow(new RuntimeException(mensagemErro));
 
-        mockMvc.perform(get("/api/categorias/findById/{id}", idInexistente))
+        mockMvc.perform(get("/api/categorias/findById/{id}", idInexistente)
+                    .accept(MediaType.APPLICATION_JSON)
+                )
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(mensagemErro));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value(mensagemErro))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"));
 
         verify(categoriaServiceMock, times(1)).findById(idInexistente);
     }
 
     @Test
-    @DisplayName("[Integration Test com Mock] PUT /update/{id} - Deve atualizar categoria com sucesso")
+    @DisplayName("TESTE DE INTEGRAÇÃO - PUT /update/{id} - Deve atualizar categoria com sucesso")
+    @WithMockUser(username = "testadmin", roles = {"ADMIN"})
     void update_deveAtualizarCategoria_quandoDadosValidos() throws Exception {
         Long idParaAtualizar = 1L;
         Categoria dadosUpdate = new Categoria(idParaAtualizar, "Anéis de Ouro", null);
@@ -134,7 +146,8 @@ class CategoriaControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration Test com Mock] DELETE /delete/{id} - Deve deletar categoria com sucesso")
+    @DisplayName("TESTE DE INTEGRAÇÃO - DELETE /delete/{id} - Deve deletar categoria com sucesso")
+    @WithMockUser(username = "testadmin", roles = {"ADMIN"})
     void delete_deveDeletarCategoria_quandoIdExiste() throws Exception {
         Long idParaDeletar = 1L;
         String mensagemSucesso = "Categoria ID " + idParaDeletar + " deletada com sucesso!";

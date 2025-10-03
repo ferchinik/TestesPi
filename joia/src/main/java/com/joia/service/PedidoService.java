@@ -1,5 +1,7 @@
 package com.joia.service;
 
+import com.joia.dto.FaturamentoDTO;
+import com.joia.entity.Joia;
 import com.joia.entity.Pedido;
 import com.joia.repository.PedidoRepository;
 import jakarta.validation.Valid;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils; // Para checar coleções vazias
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date; // Import correto para Date
 import java.util.List;
@@ -89,5 +92,20 @@ public class PedidoService {
         if (CollectionUtils.isEmpty(pedidoEntity.getJoias())) {
             throw new IllegalArgumentException("O pedido deve conter pelo menos uma joia!");
         }
+    }
+
+    public FaturamentoDTO calcularFaturamentoTotal() {
+        List<Pedido> pedidos = pedidoRepository.findAll();
+        BigDecimal faturamentoTotal = BigDecimal.ZERO;
+        for (Pedido pedido : pedidos) {
+            if (pedido.getJoias() != null) {
+                for (Joia joia : pedido.getJoias()) {
+                    if (joia.getPreco() != null) {
+                        faturamentoTotal = faturamentoTotal.add(joia.getPreco());
+                    }
+                }
+            }
+        }
+        return new FaturamentoDTO(faturamentoTotal);
     }
 }

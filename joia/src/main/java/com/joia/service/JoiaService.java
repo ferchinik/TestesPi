@@ -5,10 +5,9 @@ import com.joia.repository.JoiaRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils; // Import para verificar strings
+import org.springframework.util.StringUtils;
 
-import java.math.BigDecimal; // Import para BigDecimal
-import java.util.Collections; // Import para lista vazia
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service

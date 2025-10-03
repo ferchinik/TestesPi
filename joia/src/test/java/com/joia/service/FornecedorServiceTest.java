@@ -51,9 +51,8 @@ class FornecedorServiceTest {
     }
 
     // --- Testes para save ---
-
     @Test
-    @DisplayName("[Unit Test] Deve salvar fornecedor com sucesso")
+    @DisplayName("TESTE DE UNIDADE – Deve salvar fornecedor com sucesso")
     void save_deveSalvarComSucesso_quandoNomeValido() {
         // Arrange
         Fornecedor novoFornecedor = new Fornecedor(null, "Joias & Cia", null);
@@ -69,7 +68,7 @@ class FornecedorServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao salvar fornecedor com nome vazio")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao salvar fornecedor com nome vazio")
     void save_deveLancarExcecao_quandoNomeVazio() {
         // Arrange
         Fornecedor fornecedorInvalido = new Fornecedor(null, "", null);
@@ -82,9 +81,8 @@ class FornecedorServiceTest {
     }
 
     // --- Testes para findById ---
-
     @Test
-    @DisplayName("[Unit Test] Deve retornar fornecedor quando ID existe")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar fornecedor quando ID existe")
     void findById_deveRetornarFornecedor_quandoIdExiste() {
         // Arrange
         Long idExistente = fornecedorValido.getId();
@@ -100,7 +98,7 @@ class FornecedorServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção quando ID não existe em findById")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção quando ID não existe em findById")
     void findById_deveLancarExcecao_quandoIdNaoExiste() {
         // Arrange
         Long idInexistente = 99L;
@@ -114,9 +112,8 @@ class FornecedorServiceTest {
     }
 
     // --- Testes para findAll ---
-
     @Test
-    @DisplayName("[Unit Test] Deve retornar todos os fornecedores")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar todos os fornecedores")
     void findAll_deveRetornarTodosFornecedores() {
         // Arrange
         List<Fornecedor> listaMock = List.of(fornecedorValido, fornecedorComJoias);
@@ -131,9 +128,8 @@ class FornecedorServiceTest {
     }
 
     // --- Testes para update ---
-
     @Test
-    @DisplayName("[Unit Test] Deve atualizar fornecedor com sucesso")
+    @DisplayName("TESTE DE UNIDADE – Deve atualizar fornecedor com sucesso")
     void update_deveAtualizarComSucesso() {
         // Arrange
         Long idParaAtualizar = fornecedorValido.getId();
@@ -154,7 +150,7 @@ class FornecedorServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao atualizar fornecedor com nome vazio")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao atualizar fornecedor com nome vazio")
     void update_deveLancarExcecao_quandoNomeVazio() {
         // Arrange
         Long idParaAtualizar = fornecedorValido.getId();
@@ -170,7 +166,7 @@ class FornecedorServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao atualizar fornecedor com ID inexistente")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao atualizar fornecedor com ID inexistente")
     void update_deveLancarExcecao_quandoIdNaoExiste() {
         // Arrange
         Long idInexistente = 99L;
@@ -186,9 +182,8 @@ class FornecedorServiceTest {
     }
 
     // --- Testes para delete ---
-
     @Test
-    @DisplayName("[Unit Test] Deve deletar fornecedor com sucesso quando não tem joias associadas")
+    @DisplayName("TESTE DE UNIDADE – Deve deletar fornecedor com sucesso quando não tem joias associadas")
     void delete_deveDeletarComSucesso_quandoNaoHaJoias() {
         // Arrange
         Long idParaDeletar = fornecedorSemJoias.getId();
@@ -205,7 +200,7 @@ class FornecedorServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao deletar fornecedor com joias associadas")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao deletar fornecedor com joias associadas")
     void delete_deveLancarExcecao_quandoHaJoiasAssociadas() {
         // Arrange
         Long idParaDeletar = fornecedorComJoias.getId(); // Este tem joia mockada no setUp
@@ -220,9 +215,8 @@ class FornecedorServiceTest {
     }
 
     // --- Testes para findByNomeContaining ---
-
     @Test
-    @DisplayName("[Unit Test] Deve retornar fornecedores contendo o termo no nome")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar fornecedores contendo o termo no nome")
     void findByNomeContaining_deveRetornarFornecedoresCorrespondentes() {
         // Arrange
         String termo = "Nobre";
@@ -238,7 +232,7 @@ class FornecedorServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve retornar lista vazia ao buscar por nome inexistente em findByNomeContaining")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar lista vazia ao buscar por nome inexistente em findByNomeContaining")
     void findByNomeContaining_deveRetornarListaVazia_quandoNomeNaoEncontrado() {
         // Arrange
         String termo = "Inexistente";
@@ -253,7 +247,7 @@ class FornecedorServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve retornar lista vazia ao buscar por nome vazio ou nulo em findByNomeContaining")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar lista vazia ao buscar por nome vazio ou nulo em findByNomeContaining")
     void findByNomeContaining_deveRetornarListaVazia_quandoNomeVazioOuNulo() {
         // Arrange & Act & Assert para nome vazio
         List<Fornecedor> resultadoVazio = fornecedorService.findByNomeContaining("");
@@ -268,9 +262,8 @@ class FornecedorServiceTest {
     }
 
     // --- Testes para findByJoiasIsNotEmpty ---
-
     @Test
-    @DisplayName("[Unit Test] Deve retornar fornecedores que possuem joias")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar fornecedores que possuem joias")
     void findByJoiasIsNotEmpty_deveRetornarFornecedoresComJoias() {
         // Arrange
         List<Fornecedor> listaMock = List.of(fornecedorComJoias);
@@ -285,9 +278,8 @@ class FornecedorServiceTest {
     }
 
     // --- Testes para findAllByOrderByNomeAsc ---
-
     @Test
-    @DisplayName("[Unit Test] Deve retornar fornecedores ordenados por nome ascendente")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar fornecedores ordenados por nome ascendente")
     void findAllByOrderByNomeAsc_deveRetornarFornecedoresOrdenadosAsc() {
         // Arrange
         // Ordem esperada: Gemas Raras Com (3), Ouro Nobre Ltda (1), Prata Fina SA (2)
@@ -303,9 +295,8 @@ class FornecedorServiceTest {
     }
 
     // --- Testes para findByJoiasIsEmpty ---
-
     @Test
-    @DisplayName("[Unit Test] Deve retornar fornecedores que não possuem joias")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar fornecedores que não possuem joias")
     void findByJoiasIsEmpty_deveRetornarFornecedoresSemJoias() {
         // Arrange
         List<Fornecedor> listaMock = List.of(fornecedorValido, fornecedorSemJoias); // Assumindo que o valido também não tem joias no setup

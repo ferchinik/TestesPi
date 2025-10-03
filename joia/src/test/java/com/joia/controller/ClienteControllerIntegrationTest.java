@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -18,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.mockito.Mockito.*;
@@ -59,7 +62,8 @@ class ClienteControllerIntegrationTest {
 
 
     @Test
-    @DisplayName("[Integration Test com Mock] POST /save - Deve criar cliente com sucesso")
+    @DisplayName("TESTE DE INTEGRAÇÃO - POST /save - Deve criar cliente com sucesso")
+    @WithMockUser(username = "testadmin", roles = {"ADMIN"})
     void save_deveCriarCliente_quandoDadosValidos() throws Exception {
 
         Cliente novoCliente = new Cliente(null, "Carlos Pereira", "carlos.pereira@email.com", null);
@@ -78,7 +82,8 @@ class ClienteControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration Test] POST /save - Deve retornar Bad Request ao salvar com nome vazio")
+    @DisplayName("TESTE DE INTEGRAÇÃO - POST /save - Deve retornar Bad Request ao salvar com nome vazio")
+    @WithMockUser(username = "testadmin", roles = {"ADMIN"})
     void save_deveRetornarBadRequest_quandoNomeVazio() throws Exception {
         Cliente clienteInvalido = new Cliente(null, "", "invalido@email.com", null);
         String clienteJson = objectMapper.writeValueAsString(clienteInvalido);
@@ -93,7 +98,8 @@ class ClienteControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration Test] POST /save - Deve retornar Bad Request ao salvar com email inválido")
+    @DisplayName("TESTE DE INTEGRAÇÃO - POST /save - Deve retornar Bad Request ao salvar com email inválido")
+    @WithMockUser(username = "testadmin", roles = {"ADMIN"})
     void save_deveRetornarBadRequest_quandoEmailInvalido() throws Exception {
         Cliente clienteInvalido = new Cliente(null, "Nome Valido", "email-invalido", null);
         String clienteJson = objectMapper.writeValueAsString(clienteInvalido);
@@ -107,7 +113,8 @@ class ClienteControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration Test com Mock] POST /save - Deve retornar Bad Request ao salvar com email duplicado")
+    @DisplayName("TESTE DE INTEGRAÇÃO - POST /save - Deve retornar Bad Request ao salvar com email duplicado")
+    @WithMockUser(username = "testadmin", roles = {"ADMIN"})
     void save_deveRetornarBadRequest_quandoEmailDuplicado() throws Exception {
         // Arrange
         Cliente clienteDuplicado = new Cliente(null, "Outro Nome", "email.duplicado@teste.com", null);
@@ -119,32 +126,36 @@ class ClienteControllerIntegrationTest {
         mockMvc.perform(post("/api/clientes/save")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(clienteJson))
-                .andExpect(status().isBadRequest()) // RuntimeException é mapeada para 400 pelo GlobalExceptionHandler
-                .andExpect(content().string(mensagemErro));
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value(mensagemErro))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"));
 
         verify(clienteServiceMock, times(1)).save(any(Cliente.class));
     }
 
-
     @Test
-    @DisplayName("[Integration Test com Mock] GET /findAll - Deve retornar todos os clientes do serviço mockado")
-    void findAll_deveRetornarTodosClientes() throws Exception {
-        List<Cliente> listaMock = List.of(clienteExistente1, clienteExistente2);
-        when(clienteServiceMock.findAll()).thenReturn(listaMock);
-        mockMvc.perform(get("/api/clientes/findAll"))
-                .andExpect(status().isOk()) // Espera HTTP 200 OK
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.length()").value(2)) // Verifica o tamanho da lista retornada pelo mock
-                .andExpect(jsonPath("$[0].id").value(clienteExistente1.getId()))
-                .andExpect(jsonPath("$[0].nome").value(clienteExistente1.getNome()))
-                .andExpect(jsonPath("$[1].id").value(clienteExistente2.getId()))
-                .andExpect(jsonPath("$[1].nome").value(clienteExistente2.getNome()));
+    @DisplayName("TESTE DE INTEGRAÇÃO - GET /findByNomeContaining - Deve retornar clientes correspondentes do serviço mockado")
+    @WithMockUser(username = "testuser")
+    void findByNomeContaining_deveRetornarClientesFiltrados() throws Exception {
+        String termoBusca = "Ana";
+        List<Cliente> listaMock = List.of(clienteExistente1);
+        when(clienteServiceMock.findByNomeContaining(termoBusca)).thenReturn(listaMock);
 
-        verify(clienteServiceMock, times(1)).findAll();
+        mockMvc.perform(get("/api/clientes/findByNomeContaining")
+                        .param("nome", termoBusca))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].nome").value(clienteExistente1.getNome()));
+
+        verify(clienteServiceMock, times(1)).findByNomeContaining(termoBusca);
     }
 
     @Test
-    @DisplayName("[Integration Test com Mock] GET /findById/{id} - Deve retornar cliente mockado quando ID existe")
+    @DisplayName("TESTE DE INTEGRAÇÃO - GET /findById/{id} - Deve retornar cliente mockado quando ID existe")
+    @WithMockUser(username = "testuser")
     void findById_deveRetornarCliente_quandoServicoMockado() throws Exception {
         Long idExistente = 1L; // ID arbitrário para o teste
         Cliente clienteMockado = new Cliente(idExistente, "Cliente Mockado Via ID", "mockid@email.com", new ArrayList<>());
@@ -162,21 +173,66 @@ class ClienteControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration Test com Mock] GET /findById/{id} - Deve retornar Bad Request quando serviço mockado lança exceção")
+    @DisplayName("TESTE DE INTEGRAÇÃO - GET /findById/{id} - Deve retornar Bad Request quando serviço mockado lança exceção")
+    @WithMockUser(username = "testuser")
     void findById_deveRetornarBadRequest_quandoServicoMockadoLancaExcecao() throws Exception {
         Long idInexistente = 999L;
         String mensagemErro = "Cliente ID " + idInexistente + " não encontrado!";
         when(clienteServiceMock.findById(idInexistente)).thenThrow(new RuntimeException(mensagemErro));
 
         mockMvc.perform(get("/api/clientes/findById/{id}", idInexistente)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON)
+                )
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(mensagemErro));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value(mensagemErro))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"));
 
         verify(clienteServiceMock, times(1)).findById(idInexistente);
     }
+
     @Test
-    @DisplayName("[Integration Test com Mock] PUT /update/{id} - Deve atualizar cliente com sucesso")
+    @DisplayName("TESTE DE INTEGRAÇÃO - GET /findByPedidosIsNotEmpty - Deve retornar Bad Request (Access Denied) para ROLE_USER")
+    @WithMockUser(username = "testuser")
+    void findByPedidosIsNotEmpty_deveRetornarBadRequestAccessDenied_comUser() throws Exception {
+        mockMvc.perform(get("/api/clientes/findByPedidosIsNotEmpty"))
+                .andExpect(status().isBadRequest()) // Ou isForbidden()
+                .andExpect(jsonPath("$.message", containsString("Access Denied")));
+        verify(clienteServiceMock, never()).findByPedidosIsNotEmpty();
+    }
+
+    @Test
+    @DisplayName("TESTE DE INTEGRAÇÃO - GET /findClientesSemPedidos - Deve retornar Bad Request (Access Denied) para ROLE_USER")
+    @WithMockUser(username = "testuser")
+    void findClientesSemPedidos_deveRetornarBadRequestAccessDenied_comUser() throws Exception {
+        mockMvc.perform(get("/api/clientes/findClientesSemPedidos"))
+                .andExpect(status().isBadRequest()) // Ou isForbidden()
+                .andExpect(jsonPath("$.message", containsString("Access Denied")));
+        verify(clienteServiceMock, never()).findClientesSemPedidos();
+    }
+
+    @Test
+    @DisplayName("TESTE DE INTEGRAÇÃO - GET /findAll - Deve retornar todos os clientes do serviço mockado")
+    @WithMockUser(username = "testuser")
+    void findAll_deveRetornarTodosClientes() throws Exception {
+        List<Cliente> listaMock = List.of(clienteExistente1, clienteExistente2);
+        when(clienteServiceMock.findAll()).thenReturn(listaMock);
+        mockMvc.perform(get("/api/clientes/findAll"))
+                .andExpect(status().isOk()) // Espera HTTP 200 OK
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.length()").value(2)) // Verifica o tamanho da lista retornada pelo mock
+                .andExpect(jsonPath("$[0].id").value(clienteExistente1.getId()))
+                .andExpect(jsonPath("$[0].nome").value(clienteExistente1.getNome()))
+                .andExpect(jsonPath("$[1].id").value(clienteExistente2.getId()))
+                .andExpect(jsonPath("$[1].nome").value(clienteExistente2.getNome()));
+
+        verify(clienteServiceMock, times(1)).findAll();
+    }
+
+    @Test
+    @DisplayName("TESTE DE INTEGRAÇÃO - PUT /update/{id} - Deve atualizar cliente com sucesso")
+    @WithMockUser(username = "testadmin", roles = {"ADMIN"})
     void update_deveAtualizarCliente_quandoDadosValidos() throws Exception {
         Long idParaAtualizar = clienteExistente1.getId(); // Usa um ID que existiria no banco
         Cliente dadosUpdate = new Cliente(idParaAtualizar, "Ana Silva Atualizada Mock", "ana.mock.atualizada@email.com", null);
@@ -196,7 +252,8 @@ class ClienteControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration Test com Mock] PUT /update/{id} - Deve retornar Bad Request se serviço mockado lança exceção (ID não existe)")
+    @DisplayName("TESTE DE INTEGRAÇÃO - PUT /update/{id} - Deve retornar Bad Request se serviço mockado lança exceção (ID não existe)")
+    @WithMockUser(username = "testadmin", roles = {"ADMIN"})
     void update_deveRetornarBadRequest_quandoServicoMockadoLancaExcecaoIdNaoExiste() throws Exception {
         Long idInexistente = 999L;
         Cliente dadosUpdate = new Cliente(idInexistente, "Nome Qualquer", "email.qualquer@email.com", null);
@@ -209,13 +266,17 @@ class ClienteControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(clienteJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(mensagemErro));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value(mensagemErro))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"));
 
         verify(clienteServiceMock, times(1)).update(any(Cliente.class), eq(idInexistente));
     }
 
     @Test
-    @DisplayName("[Integration Test com Mock] DELETE /delete/{id} - Deve deletar cliente com sucesso")
+    @DisplayName("TESTE DE INTEGRAÇÃO - DELETE /delete/{id} - Deve deletar cliente com sucesso")
+    @WithMockUser(username = "testadmin", roles = {"ADMIN"})
     void delete_deveDeletarCliente_quandoServicoMockadoRetornaSucesso() throws Exception {
         Long idParaDeletar = clienteExistente1.getId(); // Usa um ID que existiria
         String mensagemSucesso = "Cliente ID " + idParaDeletar + " deletado com sucesso!";
@@ -230,36 +291,39 @@ class ClienteControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration Test com Mock] DELETE /delete/{id} - Deve retornar Bad Request se serviço mockado lança exceção (ID não existe)")
+    @DisplayName("TESTE DE INTEGRAÇÃO - DELETE /delete/{id} - Deve retornar Bad Request se serviço mockado lança exceção (ID não existe)")
+    @WithMockUser(username = "testadmin", roles = {"ADMIN"})
     void delete_deveRetornarBadRequest_quandoServicoMockadoLancaExcecaoIdNaoExiste() throws Exception {
         Long idInexistente = 999L;
         String mensagemErro = "Cliente ID " + idInexistente + " não encontrado!";
 
         when(clienteServiceMock.delete(idInexistente)).thenThrow(new RuntimeException(mensagemErro));
 
-        mockMvc.perform(delete("/api/clientes/delete/{id}", idInexistente))
+        mockMvc.perform(delete("/api/clientes/delete/{id}", idInexistente)
+                        .accept(MediaType.APPLICATION_JSON)
+                )
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(mensagemErro));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value(mensagemErro))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"));
 
         verify(clienteServiceMock, times(1)).delete(idInexistente);
     }
 
-
     @Test
-    @DisplayName("[Integration Test com Mock] GET /findByNomeContaining - Deve retornar clientes correspondentes do serviço mockado")
-    void findByNomeContaining_deveRetornarClientesFiltrados() throws Exception {
-        String termoBusca = "Ana";
-        List<Cliente> listaMock = List.of(clienteExistente1);
-        when(clienteServiceMock.findByNomeContaining(termoBusca)).thenReturn(listaMock);
+    @DisplayName("TESTE DE INTEGRAÇÃO - DELETE /delete/{id} - Deve retornar Bad Request (Access Denied) para ROLE_USER")
+    @WithMockUser(username = "testuser")
+    void delete_deveRetornarBadRequestAccessDenied_comUser() throws Exception {
+        Long idParaDeletar = clienteExistente1.getId();
 
-        mockMvc.perform(get("/api/clientes/findByNomeContaining")
-                        .param("nome", termoBusca))
-                .andExpect(status().isOk())
+        mockMvc.perform(delete("/api/clientes/delete/{id}", idParaDeletar)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest()) // Ou isForbidden()
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].nome").value(clienteExistente1.getNome()));
+                .andExpect(jsonPath("$.message", containsString("Access Denied")));
 
-        verify(clienteServiceMock, times(1)).findByNomeContaining(termoBusca);
+        verify(clienteServiceMock, never()).delete(idParaDeletar);
     }
 
 }

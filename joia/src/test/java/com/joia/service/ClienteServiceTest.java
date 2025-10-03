@@ -24,20 +24,20 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class) // Habilita a integração do Mockito com JUnit 5
+@ExtendWith(MockitoExtension.class)
 class ClienteServiceTest {
 
-    @InjectMocks // Cria uma instância de ClienteService e injeta os mocks declarados abaixo
+    @InjectMocks
     private ClienteService clienteService;
 
-    @Mock // Cria um mock para ClienteRepository
+    @Mock
     private ClienteRepository clienteRepository;
 
     private Cliente clienteValido;
     private Cliente clienteExistente;
     private Cliente clienteSemPedidos;
 
-    @BeforeEach // Executado antes de cada teste
+    @BeforeEach
     void setUp() {
         // Cria clientes reutilizáveis para os testes
         clienteValido = new Cliente(1L, "Cliente Teste", "teste@email.com", new ArrayList<>());
@@ -50,9 +50,8 @@ class ClienteServiceTest {
     }
 
     // --- Testes para o método save ---
-
     @Test
-    @DisplayName("[Unit Test] Deve salvar cliente com sucesso quando dados válidos e email não existe")
+    @DisplayName("TESTE DE UNIDADE – Deve salvar cliente com sucesso quando dados válidos e email não existe")
     void save_deveSalvarComSucesso_quandoDadosValidos() {
         // Arrange
         Cliente novoCliente = new Cliente(null, "Novo Cliente", "novo@email.com", null);
@@ -70,7 +69,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao salvar cliente com email já existente")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao salvar cliente com email já existente")
     void save_deveLancarExcecao_quandoEmailJaExiste() {
         // Arrange
         Cliente novoCliente = new Cliente(null, "Novo Cliente", clienteExistente.getEmail(), null);
@@ -85,7 +84,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao salvar cliente com nome vazio")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao salvar cliente com nome vazio")
     void save_deveLancarExcecao_quandoNomeVazio() {
         // Arrange
         Cliente clienteInvalido = new Cliente(null, "", "invalido@email.com", null);
@@ -98,7 +97,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao salvar cliente com email vazio")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao salvar cliente com email vazio")
     void save_deveLancarExcecao_quandoEmailVazio() {
         // Arrange
         Cliente clienteInvalido = new Cliente(null, "Nome Valido", "", null);
@@ -111,9 +110,8 @@ class ClienteServiceTest {
     }
 
     // --- Testes para o método findById ---
-
     @Test
-    @DisplayName("[Unit Test] Deve retornar cliente quando ID existe")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar cliente quando ID existe")
     void findById_deveRetornarCliente_quandoIdExiste() {
         // Arrange
         Long idExistente = clienteValido.getId();
@@ -130,7 +128,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção quando ID não existe em findById")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção quando ID não existe em findById")
     void findById_deveLancarExcecao_quandoIdNaoExiste() {
         // Arrange
         Long idInexistente = 99L;
@@ -144,9 +142,8 @@ class ClienteServiceTest {
     }
 
     // --- Testes para o método findAll ---
-
     @Test
-    @DisplayName("[Unit Test] Deve retornar lista de todos os clientes")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar lista de todos os clientes")
     void findAll_deveRetornarTodosClientes() {
         // Arrange
         List<Cliente> listaClientes = List.of(clienteValido, clienteExistente);
@@ -161,7 +158,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve retornar lista vazia quando não há clientes")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar lista vazia quando não há clientes")
     void findAll_deveRetornarListaVazia_quandoNaoHaClientes() {
         // Arrange
         when(clienteRepository.findAll()).thenReturn(Collections.emptyList());
@@ -175,9 +172,8 @@ class ClienteServiceTest {
     }
 
     // --- Testes para o método update ---
-
     @Test
-    @DisplayName("[Unit Test] Deve atualizar cliente com sucesso")
+    @DisplayName("TESTE DE UNIDADE – Deve atualizar cliente com sucesso")
     void update_deveAtualizarComSucesso() {
         // Arrange
         Long idParaAtualizar = clienteValido.getId();
@@ -201,7 +197,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao atualizar se ID não existe")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao atualizar se ID não existe")
     void update_deveLancarExcecao_quandoIdNaoExiste() {
         // Arrange
         Long idInexistente = 99L;
@@ -218,7 +214,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao atualizar para email que já pertence a OUTRO cliente")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao atualizar para email que já pertence a OUTRO cliente")
     void update_deveLancarExcecao_quandoNovoEmailJaExisteEmOutroCliente() {
         // Arrange
         Long idParaAtualizar = clienteValido.getId(); // ID 1
@@ -237,7 +233,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve permitir atualizar cliente mantendo o mesmo email")
+    @DisplayName("TESTE DE UNIDADE – Deve permitir atualizar cliente mantendo o mesmo email")
     void update_devePermitirAtualizar_mantendoMesmoEmail() {
         // Arrange
         Long idParaAtualizar = clienteValido.getId();
@@ -257,11 +253,9 @@ class ClienteServiceTest {
         verify(clienteRepository).save(argThat(c -> c.getNome().equals("Nome Atualizado")));
     }
 
-
     // --- Testes para o método delete ---
-
     @Test
-    @DisplayName("[Unit Test] Deve deletar cliente com sucesso quando não há pedidos associados")
+    @DisplayName("TESTE DE UNIDADE – Deve deletar cliente com sucesso quando não há pedidos associados")
     void delete_deveDeletarComSucesso_quandoClienteNaoTemPedidos() {
         // Arrange
         Long idParaDeletar = clienteSemPedidos.getId();
@@ -278,7 +272,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao deletar cliente com pedidos associados")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao deletar cliente com pedidos associados")
     void delete_deveLancarExcecao_quandoClienteTemPedidos() {
         // Arrange
         Long idParaDeletar = clienteExistente.getId(); // Este cliente tem um pedido mockado no setUp
@@ -293,7 +287,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao deletar cliente com ID inexistente")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao deletar cliente com ID inexistente")
     void delete_deveLancarExcecao_quandoIdNaoExiste() {
         // Arrange
         Long idInexistente = 99L;
@@ -309,7 +303,7 @@ class ClienteServiceTest {
 
     // --- Testes para findByEmail ---
     @Test
-    @DisplayName("[Unit Test] Deve retornar cliente ao buscar por email existente")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar cliente ao buscar por email existente")
     void findByEmail_deveRetornarCliente_quandoEmailExiste() {
         // Arrange
         String emailExistente = clienteValido.getEmail();
@@ -325,7 +319,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao buscar por email inexistente")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao buscar por email inexistente")
     void findByEmail_deveLancarExcecao_quandoEmailNaoExiste() {
         // Arrange
         String emailInexistente = "naoexiste@email.com";
@@ -339,7 +333,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve lançar exceção ao buscar por email vazio")
+    @DisplayName("TESTE DE UNIDADE – Deve lançar exceção ao buscar por email vazio")
     void findByEmail_deveLancarExcecao_quandoEmailVazio() {
         // Arrange
         String emailVazio = "";
@@ -352,9 +346,8 @@ class ClienteServiceTest {
     }
 
     // --- Testes para findByNomeContaining ---
-
     @Test
-    @DisplayName("[Unit Test] Deve retornar lista de clientes ao buscar por parte do nome")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar lista de clientes ao buscar por parte do nome")
     void findByNomeContaining_deveRetornarClientesCorrespondentes() {
         // Arrange
         String termoBusca = "Test";
@@ -370,7 +363,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve retornar lista vazia ao buscar por nome inexistente")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar lista vazia ao buscar por nome inexistente")
     void findByNomeContaining_deveRetornarListaVazia_quandoNomeNaoEncontrado() {
         // Arrange
         String termoBusca = "Inexistente";
@@ -385,7 +378,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("[Unit Test] Deve retornar lista vazia ao buscar por nome vazio ou nulo")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar lista vazia ao buscar por nome vazio ou nulo")
     void findByNomeContaining_deveRetornarListaVazia_quandoNomeVazioOuNulo() {
         // Arrange (Teste com string vazia)
         List<Cliente> resultadoVazio = clienteService.findByNomeContaining("");
@@ -402,9 +395,8 @@ class ClienteServiceTest {
     }
 
     // --- Testes para findByPedidosIsNotEmpty ---
-
     @Test
-    @DisplayName("[Unit Test] Deve retornar clientes que possuem pedidos")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar clientes que possuem pedidos")
     void findByPedidosIsNotEmpty_deveRetornarClientesComPedidos() {
         // Arrange
         // clienteExistente foi configurado com um pedido no setUp
@@ -420,9 +412,8 @@ class ClienteServiceTest {
     }
 
     // --- Testes para findAllByOrderByNomeDesc ---
-
     @Test
-    @DisplayName("[Unit Test] Deve retornar clientes ordenados por nome descendente")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar clientes ordenados por nome descendente")
     void findAllByOrderByNomeDesc_deveRetornarClientesOrdenadosDesc() {
         // Arrange
         // A ordem correta seria clienteValido ("Cliente Teste") e depois clienteExistente ("Cliente Existente")
@@ -438,9 +429,8 @@ class ClienteServiceTest {
     }
 
     // --- Testes para findClientesSemPedidos ---
-
     @Test
-    @DisplayName("[Unit Test] Deve retornar clientes que não possuem pedidos")
+    @DisplayName("TESTE DE UNIDADE – Deve retornar clientes que não possuem pedidos")
     void findClientesSemPedidos_deveRetornarClientesSemPedidos() {
         // Arrange
         // clienteValido e clienteSemPedidos foram configurados sem pedidos no setUp
